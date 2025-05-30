@@ -39,8 +39,8 @@
       "articleUrlRegex": "/([a-z0-9/-]+)-(\\d{4}-\\d{2}-\\d{2})/"
     },
     {
-      "name": "entertainment",
-      "url": "https://www.reuters.com/lifestyle/entertainment",
+      "name": "lifestyle",
+      "url": "https://www.reuters.com/lifestyle/",
       "articleLinkSelector": "a.text__text__1FZLe",
       "articleUrlRegex": "/([a-z0-9/-]+)-(\\d{4}-\\d{2}-\\d{2})/"
     }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -18,22 +19,55 @@ type Client struct {
 func New(addr, password string, db int, keyPrefix string) (*Client, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     addr,
-		Password: password, // no password set
-		DB:       db,       // use default DB
+		Password: password,
+		DB:       db,
 	})
 
-	_, err := rdb.Ping(ctx).Result()
-	if err != nil {
-		return nil, fmt.Errorf("không thể kết nối Redis: %w", err)
+	if _, err := rdb.Ping(ctx).Result(); err != nil {
+		return nil, fmt.Errorf("không thể kết nối tới Redis tại %s: %w", addr, err)
 	}
-	log.Println("Kết nối Redis thành công.")
-	return &Client{rdb: rdb, redisKeyPrefix: keyPrefix}, nil
+	log.Printf("Đã kết nối thành công tới Redis tại %s, DB %d", addr, db)
+
+	cleanKeyPrefix := keyPrefix
+	if cleanKeyPrefix != "" && !strings.HasSuffix(cleanKeyPrefix, ":") {
+		cleanKeyPrefix += ":"
+	}
+
+	return &Client{rdb: rdb, redisKeyPrefix: cleanKeyPrefix}, nil
 }
 
 func (c *Client) getSetKey(domainName string) string {
-	return fmt.Sprintf("%s:%s:processed", c.redisKeyPrefix, domainName)
+	safeDomainName := strings.ReplaceAll(domainName, ".", "_")
+	return fmt.Sprintf("%s:%s:processed", c.redisKeyPrefix, safeDomainName)
 }
 
+func (c *Client) IsLinkProcessed(domainName, link string) (bool, error) {
+	setKey := c.getSetKey(domainName)
+	isMember, err := c.rdb.SIsMember(ctx, setKey, link).Result()
+	if err != nil {
+		log.Printf("Lỗi khi kiểm tra link '%s' trong Redis set '%s' cho domain '%s': %v", link, setKey, domainName, err)
+		return false, fmt.Errorf("lỗi SIsMember: %w", err)
+	}
+	if isMember {
+		log.Printf("Link '%s' đã tồn tại trong Redis set '%s' (domain: %s)", link, setKey, domainName)
+	}
+	return isMember, nil
+}
+
+func (c *Client) MarkLinkAsProcessed(domainName, link string) (bool, error) {
+	setKey := c.getSetKey(domainName)
+	addedCount, err := c.rdb.SAdd(ctx, setKey, link).Result()
+	if err != nil {
+		log.Printf("Lỗi khi thêm link '%s' vào Redis set '%s' cho domain '%s': %v", link, setKey, domainName, err)
+		return false, fmt.Errorf("lỗi SAdd: %w", err)
+	}
+
+	if addedCount > 0 {
+		log.Printf("Đã thêm link mới '%s' vào Redis set '%s' (domain: %s)", link, setKey, domainName)
+		return true, nil
+	}
+	return false, nil
+}
 // Trả về true nếu link được thêm mới, false nếu đã tồn tại hoặc lỗi
 func (c *Client) AddLinkIfNotExists(domainName, link string) (bool, error) {
 	setKey := c.getSetKey(domainName)
@@ -52,6 +86,10 @@ func (c *Client) AddLinkIfNotExists(domainName, link string) (bool, error) {
 }
 
 func (c *Client) Close() error {
-	return c.rdb.Close()
+	if c.rdb != nil {
+		log.Println("Đang đóng kết nối Redis...")
+		return c.rdb.Close()
+	}
+	return nil
 }
 
