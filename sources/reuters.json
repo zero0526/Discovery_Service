@@ -1,0 +1,48 @@
+{
+  "domainName": "reuters.com",
+  "baseURL": "https://www.reuters.com/",
+  "categories": [
+    {
+      "name": "markets",
+      "url": "https://www.reuters.com/markets",
+      "articleLinkSelector": "a.text__text__1FZLe",
+      "articleUrlRegex": "/([a-z0-9/-]+)-(\\d{4}-\\d{2}-\\d{2})/"
+    },
+    {
+      "name": "business",
+      "url": "https://www.reuters.com/business",
+      "articleLinkSelector": "a.text__text__1FZLe",
+      "articleUrlRegex": "/([a-z0-9/-]+)-(\\d{4}-\\d{2}-\\d{2})/"
+    },
+    {
+      "name": "business",
+      "url": "https://www.reuters.com/world",
+      "articleLinkSelector": "a.text__text__1FZLe",
+      "articleUrlRegex": "/([a-z0-9/-]+)-(\\d{4}-\\d{2}-\\d{2})/"
+    },
+    {
+      "name": "technology",
+      "url": "https://www.reuters.com/technology",
+      "articleLinkSelector": "a.text__text__1FZLe",
+      "articleUrlRegex": "/([a-z0-9/-]+)-(\\d{4}-\\d{2}-\\d{2})/"
+    },
+    {
+      "name": "health",
+      "url": "https://www.reuters.com/health",
+      "articleLinkSelector": "a.text__text__1FZLe",
+      "articleUrlRegex": "/([a-z0-9/-]+)-(\\d{4}-\\d{2}-\\d{2})/"
+    },
+    {
+      "name": "sports",
+      "url": "https://www.reuters.com/sports",
+      "articleLinkSelector": "a.text__text__1FZLe",
+      "articleUrlRegex": "/([a-z0-9/-]+)-(\\d{4}-\\d{2}-\\d{2})/"
+    },
+    {
+      "name": "entertainment",
+      "url": "https://www.reuters.com/lifestyle/entertainment",
+      "articleLinkSelector": "a.text__text__1FZLe",
+      "articleUrlRegex": "/([a-z0-9/-]+)-(\\d{4}-\\d{2}-\\d{2})/"
+    }
+  ]
+}
